@@ -200,6 +200,7 @@ void initFromFile(const char* filename, double* CONSTANTS, double* RATES, double
   size_t len = 0;
   int placeholder;
   float buffer;
+  getline(&line, &len, configfile);
 
   for(int i = 0; i < 28; i++)
   {
@@ -496,15 +497,15 @@ int main(void){
   FILE *file;
   FILE *logfile;
   start = 0.0;
-  end = 0.01;
+  end = 5.0;
   step = 0.0000001;
   int N = (end-start)/step;
   printf("%i", N);
 
   int halt = 0;
   //initConsts(CONSTANTS,RATES,STATES);
-  initFromFile("config.txt", CONSTANTS, RATES, STATES);
-  file = fopen("test2withalgebraic.csv","w");
+  initFromFile("smallerdefaultnostimFunnyandTincreasedIk1decreased.txt", CONSTANTS, RATES, STATES);
+  file = fopen("test.csv","w");
   fprintf(file,"T\tV\n");
 
 
