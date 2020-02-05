@@ -1,7 +1,7 @@
 /*
-   There are a total of 54 entries in the algebraic variable array.
-   There are a total of 26 entries in each of the rate and state variable arrays.
-   There are a total of 69 entries in the constant variable array.
+   There are a total of 59 entries in the algebraic variable array.
+   There are a total of 28 entries in each of the rate and state variable arrays.
+   There are a total of 70 entries in the constant variable array.
  */
 /*
  * VOI is time in component environment (second).
@@ -12,6 +12,7 @@
  * CONSTANTS[3] is Cm in component membrane (microF).
  * ALGEBRAIC[26] is i_Na in component sodium_current (nanoA).
  * ALGEBRAIC[27] is i_Ca_L in component L_type_Ca_channel (nanoA).
+ * ALGEBRAIC[56] is i_Ca_T in component T_type_Ca_channel (nanoA).
  * ALGEBRAIC[29] is i_t in component Ca_independent_transient_outward_K_current (nanoA).
  * ALGEBRAIC[30] is i_ss in component steady_state_outward_K_current (nanoA).
  * ALGEBRAIC[34] is i_f in component hyperpolarisation_activated_current (nanoA).
@@ -40,7 +41,7 @@
  * ALGEBRAIC[2] is j_max in component sodium_current_j_gate (dimensionless).
  * ALGEBRAIC[16] is tau_j in component sodium_current_j_gate (second).
  * CONSTANTS[11] is g_Ca_L in component L_type_Ca_channel (microS).
- * CONSTANTS[12] is E_Ca_L in component L_type_Ca_channel (millivolt).
+ * CONSTANTS[12] is E_Ca_L in component L_type_Ca_channel and E_Ca_T in component T_type_Ca_channel (millivolt).
  * STATES[5] is Ca_ss in component intracellular_ion_concentrations (millimolar).
  * STATES[6] is d in component L_type_Ca_channel_d_gate (dimensionless).
  * STATES[7] is f_11 in component L_type_Ca_channel_f_11_gate (dimensionless).
@@ -54,6 +55,13 @@
  * ALGEBRAIC[19] is tau_f_12 in component L_type_Ca_channel_f_12_gate (second).
  * CONSTANTS[13] is tau_Ca_inact in component L_type_Ca_channel_Ca_inact_gate (second).
  * ALGEBRAIC[6] is Ca_inact_max in component L_type_Ca_channel_Ca_inact_gate (dimensionless).
+ * ALGEBRAIC[57] is tau_b in T_type_Ca_channel (second).
+ * ALGEBRAIC[58] is tau_g in T_type_Ca_channel (second).
+ * ALGEBRAIC[54] is b_inf in T_type_Ca_channel (dimensionless).
+ * ALGEBRAIC[55] is g_inf in T_type_Ca_channel (dimensionless).
+ * STATES[26] is b in T_type_Ca_channel (dimensionless).
+ * STATES[27] is g in T_type_Ca_channel (dimensionless).
+ * CONSTANTS[69] is G_Ca_T in T_type_Ca_channel (dimensionless).
  * ALGEBRAIC[28] is E_K in component Ca_independent_transient_outward_K_current (millivolt).
  * CONSTANTS[14] is g_t in component Ca_independent_transient_outward_K_current (microS).
  * CONSTANTS[15] is a in component Ca_independent_transient_outward_K_current (dimensionless).
@@ -283,6 +291,9 @@ CONSTANTS[65] = 10;
 CONSTANTS[66] = 2.10000;
 CONSTANTS[67] = 1.00000 - CONSTANTS[21];
 CONSTANTS[68] = (exp(CONSTANTS[10]/67.3000) - 1.00000)/7.00000;
+CONSTANTS[69] = 5.4e-4;
+STATES[26] = 0.0;
+STATES[27] = 1.0;
 }
 void
 computeRates(double VOI, double* CONSTANTS, double* RATES, double* STATES, double* ALGEBRAIC)
@@ -338,6 +349,13 @@ RATES[10] = - (ALGEBRAIC[30]+ALGEBRAIC[37]+ALGEBRAIC[29]+ALGEBRAIC[31]+ALGEBRAIC
 ALGEBRAIC[25] =  (( CONSTANTS[0]*CONSTANTS[1])/CONSTANTS[2])*log(CONSTANTS[10]/STATES[1]);
 ALGEBRAIC[26] =  CONSTANTS[9]*pow(STATES[2], 3.00000)*STATES[3]*STATES[4]*(STATES[0] - ALGEBRAIC[25]);
 ALGEBRAIC[27] =  CONSTANTS[11]*STATES[6]*( (0.900000+STATES[9]/10.0000)*STATES[7]+ (0.100000 - STATES[9]/10.0000)*STATES[8])*(STATES[0] - CONSTANTS[12]);
+ALGEBRAIC[54] = 1.0/(1.0 + exp((36.0 - STATES[0])/6.1));
+ALGEBRAIC[55] = 1.0/(1.0 + exp((66.0 + STATES[0])/6.0));
+ALGEBRAIC[57] = 0.6 + 5.4/(1.0 + exp(0.03*(STATES[0]+100.0)));
+ALGEBRAIC[58] = 1.0 + 40.0/(1.0 + exp(0.08*(STATES[0]+65)));
+RATES[26] = (ALGEBRAIC[54] - STATES[26])/ALGEBRAIC[57];
+RATES[27] = (ALGEBRAIC[55] - STATES[27])/ALGEBRAIC[58];
+ALGEBRAIC[56] = CONSTANTS[69]*STATES[26]*STATES[27]*(STATES[0] - CONSTANTS[12] + 106.5);
 ALGEBRAIC[32] =  CONSTANTS[20]*STATES[16]*CONSTANTS[21]*(STATES[0] - ALGEBRAIC[25]);
 ALGEBRAIC[34] = ALGEBRAIC[32]+ALGEBRAIC[33];
 ALGEBRAIC[35] =  CONSTANTS[22]*(STATES[0] - ALGEBRAIC[25]);
@@ -346,7 +364,7 @@ ALGEBRAIC[38] = ALGEBRAIC[35]+ALGEBRAIC[36]+ALGEBRAIC[37];
 ALGEBRAIC[41] = ( CONSTANTS[31]*( pow(STATES[1], 3.00000)*CONSTANTS[26]*exp( 0.0374300*STATES[0]*CONSTANTS[33]) -  pow(CONSTANTS[10], 3.00000)*STATES[17]*exp( 0.0374300*STATES[0]*(CONSTANTS[33] - 1.00000))))/(1.00000+ CONSTANTS[32]*( STATES[17]*pow(CONSTANTS[10], 3.00000)+ CONSTANTS[26]*pow(STATES[1], 3.00000)));
 ALGEBRAIC[40] = ( CONSTANTS[30]*STATES[17])/(STATES[17]+0.000400000);
 ALGEBRAIC[13] = (VOI>=CONSTANTS[4]&&VOI<=CONSTANTS[5]&&(VOI - CONSTANTS[4]) -  floor((VOI - CONSTANTS[4])/CONSTANTS[6])*CONSTANTS[6]<=CONSTANTS[7] ? CONSTANTS[8] : 0.00000);
-RATES[0] = - (ALGEBRAIC[26]+ALGEBRAIC[27]+ALGEBRAIC[29]+ALGEBRAIC[30]+ALGEBRAIC[34]+ALGEBRAIC[31]+ALGEBRAIC[38]+ALGEBRAIC[39]+ALGEBRAIC[41]+ALGEBRAIC[40]+ALGEBRAIC[13])/CONSTANTS[3];
+RATES[0] = - (ALGEBRAIC[26]+ALGEBRAIC[27]+ALGEBRAIC[56]+ALGEBRAIC[29]+ALGEBRAIC[30]+ALGEBRAIC[34]+ALGEBRAIC[31]+ALGEBRAIC[38]+ALGEBRAIC[39]+ALGEBRAIC[41]+ALGEBRAIC[40]+ALGEBRAIC[13])/CONSTANTS[3];
 RATES[1] = - (ALGEBRAIC[26]+ALGEBRAIC[35]+ ALGEBRAIC[41]*3.00000+ ALGEBRAIC[39]*3.00000+ALGEBRAIC[32])/( CONSTANTS[56]*CONSTANTS[2]);
 ALGEBRAIC[43] = pow(STATES[17]/CONSTANTS[41], CONSTANTS[46]);
 ALGEBRAIC[44] = pow(STATES[23]/CONSTANTS[42], CONSTANTS[47]);
@@ -358,7 +376,7 @@ RATES[24] = ALGEBRAIC[48];
 ALGEBRAIC[42] =  CONSTANTS[34]*(STATES[18]+STATES[19])*(STATES[22] - STATES[5]);
 ALGEBRAIC[46] = (STATES[5] - STATES[17])/CONSTANTS[49];
 ALGEBRAIC[49] = 1.00000/(1.00000+( CONSTANTS[63]*CONSTANTS[60])/pow(CONSTANTS[60]+STATES[5], 2.00000));
-RATES[5] =  ALGEBRAIC[49]*((( ALGEBRAIC[42]*CONSTANTS[57])/CONSTANTS[59] - ( ALGEBRAIC[46]*CONSTANTS[56])/CONSTANTS[59]) - ALGEBRAIC[27]/( 2.00000*CONSTANTS[59]*CONSTANTS[2]));
+RATES[5] =  ALGEBRAIC[49]*((( ALGEBRAIC[42]*CONSTANTS[57])/CONSTANTS[59] - ( ALGEBRAIC[46]*CONSTANTS[56])/CONSTANTS[59]) - (ALGEBRAIC[27]+ALGEBRAIC[56])/( 2.00000*CONSTANTS[59]*CONSTANTS[2]));
 ALGEBRAIC[50] = 1.00000/(1.00000+( CONSTANTS[64]*CONSTANTS[61])/pow(CONSTANTS[61]+STATES[22], 2.00000));
 RATES[22] =  ALGEBRAIC[50]*(ALGEBRAIC[47] - ALGEBRAIC[42]);
 ALGEBRAIC[51] =  CONSTANTS[54]*STATES[17]*(CONSTANTS[51] - STATES[25]) -  CONSTANTS[55]*STATES[25];
@@ -424,10 +442,15 @@ ALGEBRAIC[50] = 1.00000/(1.00000+( CONSTANTS[64]*CONSTANTS[61])/pow(CONSTANTS[61
 ALGEBRAIC[51] = CONSTANTS[54]*STATES[17]*(CONSTANTS[51] - STATES[25]) -  CONSTANTS[55]*STATES[25];
 ALGEBRAIC[52] = ALGEBRAIC[48]+ALGEBRAIC[51];
 ALGEBRAIC[53] = 1.00000/(1.00000+( CONSTANTS[63]*CONSTANTS[60])/pow(CONSTANTS[60]+STATES[17], 2.00000)+( CONSTANTS[65]*CONSTANTS[62])/pow(CONSTANTS[62]+STATES[17], 2.00000));
+ALGEBRAIC[54] = 1.0/(1.0 + exp((36.0 - STATES[0])/6.1));
+ALGEBRAIC[55] = 1.0/(1.0 + exp((66.0 + STATES[0])/6.0));
+ALGEBRAIC[56] = CONSTANTS[69]*STATES[26]*STATES[27]*(STATES[0] - CONSTANTS[12] + 106.5);
+ALGEBRAIC[57] = 0.6 + 5.4/(1.0 + exp(0.03*(STATES[0]+100.0)));
+ALGEBRAIC[58] = 1.0 + 40.0/(1.0 + exp(0.08*(STATES[0]+65)));
 }
 
 int main(void){
-  double CONSTANTS[69], RATES[26], STATES[26], ALGEBRAIC[54],VOI,start, end, step;
+  double CONSTANTS[70], RATES[28], STATES[28], ALGEBRAIC[59],VOI,start, end, step;
   FILE *file;
   FILE *logfile;
   start = 0.0;
@@ -460,7 +483,7 @@ int main(void){
       STATES[k]+=RATES[k]*step;
     }
     //computeVariables(VOI,CONSTANTS,RATES,STATES,ALGEBRAIC);
-    if(i%100 == 0)
+    if(i%10000 == 0)
     {
       fprintf(file,"%f\t%f\n", VOI, STATES[0]);
     }
