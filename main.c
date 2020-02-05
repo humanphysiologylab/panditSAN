@@ -506,8 +506,8 @@ int main(void){
   //initConsts(CONSTANTS,RATES,STATES);
   initFromFile("smallerdefaultnostimFunnyandTincreasedIk1decreased.txt", CONSTANTS, RATES, STATES);
   file = fopen("test.csv","w");
-  fprintf(file,"T\tV\n");
-
+  //fprintf(file,"T\tV\n");
+  fprintf(file, "T\tV\tI_na\tI_CaL\tI_CaT\tI_t\tI_ss\tI_f\tI_k1\tI_b\tI_NaK\tI_NCX\tI_CaP\tI_stim\n");
 
   VOI = start;
   for (int i = 0; i < N; i++){
@@ -529,7 +529,8 @@ int main(void){
     //computeVariables(VOI,CONSTANTS,RATES,STATES,ALGEBRAIC);
     if(i%10000 == 0)
     {
-      fprintf(file,"%f\t%f\n", VOI, STATES[0]);
+      fprintf(file,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", VOI, STATES[0], ALGEBRAIC[26], ALGEBRAIC[27], 
+      ALGEBRAIC[56], ALGEBRAIC[29], ALGEBRAIC[30], ALGEBRAIC[34], ALGEBRAIC[31], ALGEBRAIC[38], ALGEBRAIC[39], ALGEBRAIC[41], ALGEBRAIC[40], ALGEBRAIC[13]);
     }
     if(halt){
       printf("%f",VOI);
