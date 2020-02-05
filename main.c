@@ -190,7 +190,49 @@
  * RATES[23] is d/dt Ca_NSR in component intracellular_ion_concentrations (millimolar).
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
+
+void initFromFile(const char* filename, double* CONSTANTS, double* RATES, double *STATES)
+{
+  FILE* configfile = fopen(filename, "r");
+  char * line = NULL;
+  size_t len = 0;
+  int placeholder;
+  float buffer;
+
+  for(int i = 0; i < 28; i++)
+  {
+    getline(&line, &len, configfile);
+    sscanf(line, "STATES[%d] = %f", &placeholder, &buffer);
+    STATES[i] = buffer;
+  }
+  for(int i = 0; i < 70; i++)
+  {
+    getline(&line, &len, configfile);
+    sscanf(line, "CONSTANTS[%d] = %f", &placeholder, &buffer);
+    CONSTANTS[i] = buffer;
+  }
+  fclose(configfile);
+
+  //debug 
+  /*
+  FILE* debug = fopen("debug.txt", "w");
+  for(int i = 0; i < 28; i++)
+  {
+    fprintf(debug, "STATES[%d] = %f\n", i, STATES[i]);
+  }
+  for(int i = 0; i < 70; i++)
+  {
+    fprintf(debug, "CONSTANTS[%d] = %f\n", i, CONSTANTS[i]);
+  }
+  fclose(debug);
+  */
+
+  //calculated constants
+  CONSTANTS[67] = 1.00000 - CONSTANTS[21];
+  CONSTANTS[68] = (exp(CONSTANTS[10]/67.3000) - 1.00000)/7.00000;
+}
 
 void
 initConsts(double* CONSTANTS, double* RATES, double *STATES)
@@ -454,13 +496,14 @@ int main(void){
   FILE *file;
   FILE *logfile;
   start = 0.0;
-  end = 2.0;
+  end = 0.01;
   step = 0.0000001;
   int N = (end-start)/step;
   printf("%i", N);
 
   int halt = 0;
-  initConsts(CONSTANTS,RATES,STATES);
+  //initConsts(CONSTANTS,RATES,STATES);
+  initFromFile("config.txt", CONSTANTS, RATES, STATES);
   file = fopen("test2withalgebraic.csv","w");
   fprintf(file,"T\tV\n");
 
