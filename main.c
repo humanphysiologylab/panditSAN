@@ -525,7 +525,7 @@ int main(int argc, char *argv[]){
   FILE *logfile;
   start = 0.0;
   end = 2.0;
-  step = 0.0000001;
+  step = 1e-9;
   int N = (end-start)/step;
   //printf("%i", N);
 
@@ -562,7 +562,7 @@ int main(int argc, char *argv[]){
       STATES[k]+=RATES[k]*step;
     }
     //computeVariables(VOI,CONSTANTS,RATES,STATES,ALGEBRAIC);
-    if(i%100000 == 0)
+    if(i%10000000 == 0)
     {
       //fprintf(file,"%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\t%f\n", VOI, STATES[0], ALGEBRAIC[26], ALGEBRAIC[27],
       //ALGEBRAIC[56], ALGEBRAIC[29], ALGEBRAIC[30], ALGEBRAIC[34], ALGEBRAIC[31], ALGEBRAIC[38], ALGEBRAIC[39], ALGEBRAIC[41], ALGEBRAIC[40], ALGEBRAIC[13], ALGEBRAIC[33], ALGEBRAIC[32], ALGEBRAIC[35], ALGEBRAIC[36], ALGEBRAIC[37]);
